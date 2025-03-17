@@ -10,6 +10,7 @@ public class A {
         System.out.println(val);
     }
 
+
     public int test1(){
         B b1=new B();
         b1.test2();

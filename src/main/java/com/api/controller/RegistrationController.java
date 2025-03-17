@@ -4,12 +4,15 @@ import com.api.entity.Registration;
 import com.api.entity.RegistrationDto;
 import com.api.service.RegistrationService;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
@@ -22,7 +25,7 @@ public class RegistrationController {
     public RegistrationController(RegistrationService registrationService) {
         this.registrationService = registrationService;
     }
-
+//http://localhost:8080/api/v1/registration
 //    @GetMapping
 //    public ResponseEntity<List<Registration>> getAllRegistrations(){
 //        List<Registration> registrations = registrationService.getRegistrations();
@@ -31,15 +34,21 @@ public class RegistrationController {
 //    }
 
     //saving data
-//    @PostMapping
-//    public ResponseEntity<Registration> createRegistration(@RequestBody Registration registration){
-//
-//        Registration reg = registrationService.createRegistration(registration);
-//
-//        return new ResponseEntity<>(reg,HttpStatus.CREATED);
-//
-//
-//    }
+ @PostMapping
+    public ResponseEntity<?> createRegistration(@Valid  @RequestBody Registration registration,BindingResult bindingResult){
+
+        //only validations
+        if(bindingResult.hasErrors()) {
+
+            List<String> errorMessages = bindingResult.getFieldErrors().stream().map(er -> er.getDefaultMessage()).collect(Collectors.toList());
+            return new ResponseEntity<>(errorMessages, HttpStatus.BAD_REQUEST);
+        }
+            Registration reg = registrationService.createRegistration(registration);
+
+            return new ResponseEntity<>(reg, HttpStatus.CREATED);
+
+
+    }
 
 
 
@@ -55,10 +64,14 @@ public class RegistrationController {
 
     }
     @PutMapping("/{id}")
-    public ResponseEntity<Registration> updateRegistration(
+    public ResponseEntity<?> updateRegistration(
                                     @PathVariable long id,
-                                    @RequestBody Registration registration){
+                                   @Valid @RequestBody Registration registration,BindingResult bindingResult){
+        if(bindingResult.hasErrors()) {
 
+            List<String> errorMessages = bindingResult.getFieldErrors().stream().map(er -> er.getDefaultMessage()).collect(Collectors.toList());
+            return new ResponseEntity<>(errorMessages, HttpStatus.BAD_REQUEST);
+        }
         Registration updateReg=registrationService.updateRegistration(id,registration);
         return new ResponseEntity<>(updateReg, HttpStatus.OK);
 
@@ -85,6 +98,7 @@ public class RegistrationController {
 //
 //   }
 
+    //http://localhost:8080/api/v1/registration
     @GetMapping
     public ResponseEntity<List<RegistrationDto>> getAllRegistrations(){
         List<RegistrationDto> dtos = registrationService.getRegistrations();
@@ -92,6 +106,7 @@ public class RegistrationController {
         return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
+    //http://localhost:8080/api/v1/registration
     @GetMapping("/{id}")
     public ResponseEntity<RegistrationDto> getRegistartionById(@PathVariable long id){
         RegistrationDto dto = registrationService.getRegistrationById(id);
@@ -102,7 +117,8 @@ public class RegistrationController {
 
 
 //validation
-    @PostMapping
+
+ /*   @PostMapping
     public ResponseEntity<?> createRegistration(
 
 
@@ -110,14 +126,14 @@ public class RegistrationController {
 
         if(result.hasErrors()){
 
-            return new ResponseEntity<>(result.getFieldError().getDefaultMessage(),HttpStatus.CREATED);
+            return new ResponseEntity<>(result.getFieldError().getDefaultMessage(),HttpStatus.BAD_REQUEST));
 
         }
 
-        RegistrationDto dto = registrationService.createRegistration(registrationDto);
+        Object dto = registrationService.createRegistration(registrationDto);
         return new ResponseEntity<>(dto,HttpStatus.CREATED);
 
-    }
+    }*/
 
 
 }

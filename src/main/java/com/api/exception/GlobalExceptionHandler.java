@@ -1,6 +1,7 @@
 package com.api.exception;
 
 import com.api.payload.ErrorDto;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -36,7 +37,7 @@ public class GlobalExceptionHandler {
 
     //sending response to postman msg,date,uri
 
-    @ExceptionHandler(ResourceNotFoundExeption.class)
+   @ExceptionHandler(ResourceNotFoundExeption.class)
     public ResponseEntity<ErrorDto> resourceNotFound(ResourceNotFoundExeption r,WebRequest request){
          ErrorDto error= new ErrorDto(r.getMessage(),new Date(),request.getDescription(true));
 
@@ -44,6 +45,13 @@ public class GlobalExceptionHandler {
 
 
     }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorDto> handleDataIntegrityViolationException(DataIntegrityViolationException d,WebRequest request){
+       ErrorDto error= new ErrorDto(d.getMessage(), new Date(),request.getDescription(true));
+       return new ResponseEntity<>(error,HttpStatus.CONFLICT);
+    }
+
+
 
 
 }
